@@ -109,7 +109,7 @@ services:
       context: ./ingest
       dockerfile: Dockerfile
     ports:
-      - "3003:3003"
+      - "127.0.0.1:3003:3003"
     networks:
       - mlop_network
     depends_on:
@@ -136,7 +136,7 @@ services:
       dockerfile: server/Dockerfile
       # dockerfile: Dockerfile.bun
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     networks:
       - mlop_network
     depends_on:
@@ -167,7 +167,7 @@ services:
         - VITE_SERVER_URL=${VITE_SERVER_URL}
         - VITE_ENV=production
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - mlop_network
     depends_on:
@@ -188,7 +188,7 @@ services:
       context: ./py
       dockerfile: Dockerfile
     ports:
-      - "3004:3004"
+      - "127.0.0.1:3004:3004"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
