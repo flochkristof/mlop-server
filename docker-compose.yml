@@ -60,6 +60,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mlops-storage.rule=Host(`${API_DOMAIN}`) && PathPrefix(`/${STORAGE_BUCKET}/`)"
+      - "traefik.http.routers.mlops-storage.priority=100"
+      - "traefik.http.routers.mlops-storage.entrypoints=websecure_py"
+      - "traefik.http.routers.mlops-storage.tls=true"
+      - "traefik.http.routers.mlops-storage.tls.certresolver=myresolver"
+      - "traefik.http.services.mlops-storage.loadbalancer.server.port=9000"
     restart: unless-stopped
 
   minio_create:
