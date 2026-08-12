@@ -1,6 +1,6 @@
 [submodule "web"]
 	path = web
-	url = https://github.com/mlop-ai/web.git
+	url = https://github.com/flochkristof/mlop-web.git
 [submodule "py"]
 	path = py
 	url = https://github.com/mlop-ai/py.git
