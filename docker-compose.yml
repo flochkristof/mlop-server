@@ -132,8 +132,8 @@ services:
     restart: unless-stopped
   backend:
     build:
-      context: ./web/server
-      dockerfile: Dockerfile
+      context: ./web
+      dockerfile: server/Dockerfile
       # dockerfile: Dockerfile.bun
       args:
         - IS_DOCKER=${IS_DOCKER}
@@ -178,8 +178,8 @@ services:
 
   frontend:
     build:
-      context: ./web/app
-      dockerfile: Dockerfile
+      context: ./web
+      dockerfile: app/Dockerfile
       args:
         - VITE_IS_DOCKER=${VITE_IS_DOCKER}
         - VITE_SERVER_URL=${VITE_SERVER_URL}
