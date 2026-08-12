@@ -46,7 +46,7 @@ services:
   minio:
     image: minio/minio:latest
     ports:
-      - "9000:9000"
+      - "127.0.0.1:9000:9000"
       # - "9001:9001"
     networks:
       - mlop_network
