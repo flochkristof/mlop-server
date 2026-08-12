@@ -161,7 +161,7 @@ services:
       - clickhouse
       - db
       - minio
-    entrypoint: [ "/bin/sh", "-c", "corepack enable pnpm && pnpm exec prisma migrate deploy && node ./.next/standalone/server.js" ]
+    entrypoint: [ "/bin/sh", "-c", "corepack enable pnpm && pnpm exec prisma migrate deploy && node ./.next/standalone/server/server.js" ]
     # entrypoint: [ "/bin/sh", "-c", "bun ./.next/standalone/server.js" ]
     environment:
       - MALLOC_ARENA_MAX=1 # TODO: specific to glibc
