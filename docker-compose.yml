@@ -71,7 +71,7 @@ services:
     env_file:
       - .env
     entrypoint: >
-      /bin/sh -c " until (/usr/bin/mc alias set myminio http://minio:9000 $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY) do echo '...waiting...' && sleep 1; done; /usr/bin/mc mb myminio/$STORAGE_BUCKET; /usr/bin/mc anonymous set public myminio/$STORAGE_BUCKET; exit 0; "
+      /bin/sh -c " until (/usr/bin/mc alias set myminio http://minio:9000 $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY) do echo '...waiting...' && sleep 1; done; /usr/bin/mc mb myminio/$STORAGE_BUCKET; exit 0; "
 
   traefik:
     image: traefik:latest
@@ -82,6 +82,8 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure_py"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure_ch.address=:8443"
       - "--entrypoints.websecure_py.address=:443"
       - "--certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL}"
@@ -119,6 +121,13 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mlops-ingest.rule=Host(`${INGEST_DOMAIN}`)"
+      - "traefik.http.routers.mlops-ingest.entrypoints=websecure_py"
+      - "traefik.http.routers.mlops-ingest.tls=true"
+      - "traefik.http.routers.mlops-ingest.tls.certresolver=myresolver"
+      - "traefik.http.services.mlops-ingest.loadbalancer.server.port=3003"
     entrypoint: [ "/bin/sh", "-c", "/opt/docker-setup/create_tables.sh; exec server-rs" ]
     restart: unless-stopped
   backend:
@@ -152,12 +161,19 @@ services:
       - clickhouse
       - db
       - minio
-    entrypoint: [ "/bin/sh", "-c", "corepack enable pnpm && pnpm exec prisma migrate dev && node ./.next/standalone/server.js" ]
+    entrypoint: [ "/bin/sh", "-c", "corepack enable pnpm && pnpm exec prisma migrate deploy && node ./.next/standalone/server.js" ]
     # entrypoint: [ "/bin/sh", "-c", "bun ./.next/standalone/server.js" ]
     environment:
       - MALLOC_ARENA_MAX=1 # TODO: specific to glibc
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mlops-api.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.mlops-api.entrypoints=websecure_py"
+      - "traefik.http.routers.mlops-api.tls=true"
+      - "traefik.http.routers.mlops-api.tls.certresolver=myresolver"
+      - "traefik.http.services.mlops-api.loadbalancer.server.port=3001"
     restart: unless-stopped
 
   frontend:
@@ -177,6 +193,13 @@ services:
       - backend
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mlops-frontend.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.mlops-frontend.entrypoints=websecure_py"
+      - "traefik.http.routers.mlops-frontend.tls=true"
+      - "traefik.http.routers.mlops-frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.mlops-frontend.loadbalancer.server.port=3000"
     restart: unless-stopped
   py:
     build:
